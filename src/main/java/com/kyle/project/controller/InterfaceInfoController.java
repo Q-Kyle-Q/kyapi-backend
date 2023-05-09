@@ -2,12 +2,14 @@ package com.kyle.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import com.kyle.kyapiclientsdk.client.KyApiClient;
 import com.kyle.project.annotation.AuthCheck;
 import com.kyle.project.common.*;
 import com.kyle.project.constant.CommonConstant;
 import com.kyle.project.exception.BusinessException;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
+import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.kyle.project.model.entity.InterfaceInfo;
@@ -222,6 +224,11 @@ public class InterfaceInfoController {
         // 判断该接口是否可以调用
         com.kyle.kyapiclientsdk.model.User user = new com.kyle.kyapiclientsdk.model.User();
         user.setUsername("test");
+
+        /**
+         *  kyApiClient.getUsernameByPost(user) 这个方法需要将 kyapi-interface这个服务打开，否则 kyapi-interface的 8123端口不会打开运行，
+         *      那么 kyapi-client-sdk这个服务也不会正常运行，因为它的 kyApiClient.getUsernameByPost(user)方法使用到了8123端口进行远程调用
+         */
         String username = kyApiClient.getUsernameByPost(user);
         if (StringUtils.isBlank(username)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
@@ -260,5 +267,39 @@ public class InterfaceInfoController {
         boolean result = interfaceInfoService.updateById(interfaceInfo);
         return ResultUtils.success(result);
     }
+
+
+    /**
+     * 测试调用
+     *
+     * @param interfaceInfoInvokeRequest
+     * @param request
+     * @return
+     */
+//    @PostMapping("/invoke")
+//    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+//                                                    HttpServletRequest request) {
+//        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//        }
+//        long id = interfaceInfoInvokeRequest.getId();
+//        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+//        // 判断是否存在
+//        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+//        if (oldInterfaceInfo == null) {
+//            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+//        }
+//        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+//        }
+//        User loginUser = userService.getLoginUser(request);
+//        String accessKey = loginUser.getAccessKey();
+//        String secretKey = loginUser.getSecretKey();
+//        KyApiClient tempClient = new KyApiClient(accessKey, secretKey);
+//        Gson gson = new Gson();
+//        com.kyle.kyapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.kyle.yuapiclientsdk.model.User.class);
+//        String usernameByPost = tempClient.getUsernameByPost(user);
+//        return ResultUtils.success(usernameByPost);
+//    }
 
 }
