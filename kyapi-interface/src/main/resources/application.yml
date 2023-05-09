@@ -1,8 +1,0 @@
-server:
-  port: 8123
-  servlet:
-    context-path: /api
-kyapi:
-  client:
-    access-key: kyle
-    secret-key: abcdefgh
