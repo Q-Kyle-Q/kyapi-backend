@@ -2,11 +2,9 @@ package com.kyle.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kyle.kyapiclientsdk.client.KyApiClient;
 import com.kyle.project.annotation.AuthCheck;
-import com.kyle.project.common.BaseResponse;
-import com.kyle.project.common.DeleteRequest;
-import com.kyle.project.common.ErrorCode;
-import com.kyle.project.common.ResultUtils;
+import com.kyle.project.common.*;
 import com.kyle.project.constant.CommonConstant;
 import com.kyle.project.exception.BusinessException;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
@@ -14,6 +12,7 @@ import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.kyle.project.model.entity.InterfaceInfo;
 import com.kyle.project.model.entity.User;
+import com.kyle.project.model.enums.InterfaceInfoStatusEnum;
 import com.kyle.project.service.InterfaceInfoService;
 import com.kyle.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * 帖子接口
+ * 接口管理
  *
  * @author kyle
  */
@@ -40,6 +39,9 @@ public class InterfaceInfoController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private KyApiClient kyApiClient;
 
     // region 增删改查
 
@@ -195,5 +197,68 @@ public class InterfaceInfoController {
     }
 
     // endregion
+
+
+    /**
+     * 发布
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/online")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                     HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = idRequest.getId();
+        // 从数据库中进行查找，判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 判断该接口是否可以调用
+        com.kyle.kyapiclientsdk.model.User user = new com.kyle.kyapiclientsdk.model.User();
+        user.setUsername("test");
+        String username = kyApiClient.getUsernameByPost(user);
+        if (StringUtils.isBlank(username)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        }
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+
+    /**
+     * 下线
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/offline")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                      HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = idRequest.getId();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
+        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
 
 }
