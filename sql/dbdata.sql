@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS kyapi.`interface_info`
     `name` VARCHAR(256) NOT NULL COMMENT '名称',
     `description` VARCHAR(256) NULL COMMENT '描述',
     `url` VARCHAR(512) NOT NULL COMMENT '接口地址',
+    `requestParams` text not null comment '请求参数',
     `requestHeader` TEXT NULL COMMENT '请求头',
     `responseHeader` TEXT NULL COMMENT '响应头',
     `status` INT DEFAULT 0 NOT NULL COMMENT '接口状态（0-关闭，1-开启）',
