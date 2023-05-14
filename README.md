@@ -3,21 +3,17 @@
 
 ## 技术栈
 
-- Spring Boot 2.7.0
+- Spring Boot 2.7.0（包含Starter开发）
 - Spring MVC
 - SpringCloud-GateWay
 - Nacos 2.1.2（服务注册中心）
 - Dubbo 3.0.9（RPC 远程调用服务）
-- MySQL 驱动
+- MySQL
 - MyBatis
 - MyBatis Plus
+- Redis
 - Spring AOP
 - Swagger + Knife4j 接口文档
-- 全局请求响应拦截器（记录日志）
-- 全局异常处理器
-- 自定义错误码
-- 封装通用响应类
-- 示例用户注册、登录、搜索功能
 
 访问 localhost:7529/api/doc.html 就能在线调试接口了，不需要前端配合
 
