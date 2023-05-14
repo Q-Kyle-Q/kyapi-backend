@@ -1,0 +1,10 @@
+-------------------------------------------------------------------------------
+Test set: com.kyle.kyapiinterface.KyapiInterfaceApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 4.645 s <<< FAILURE! - in com.kyle.kyapiinterface.KyapiInterfaceApplicationTests
+contextLoads  Time elapsed: 2.417 s  <<< ERROR!
+cn.hutool.core.io.IORuntimeException: ConnectException: Connection refused: connect
+	at com.kyle.kyapiinterface.KyapiInterfaceApplicationTests.contextLoads(KyapiInterfaceApplicationTests.java:18)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at com.kyle.kyapiinterface.KyapiInterfaceApplicationTests.contextLoads(KyapiInterfaceApplicationTests.java:18)
+
