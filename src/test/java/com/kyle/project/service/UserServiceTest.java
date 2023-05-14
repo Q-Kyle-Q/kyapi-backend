@@ -1,6 +1,6 @@
 package com.kyle.project.service;
 
-import com.kyle.project.model.entity.User;
+import com.kyle.kyapicommon.model.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,29 +50,30 @@ class UserServiceTest {
         String userAccount = "kyle";
         String userPassword = "";
         String checkPassword = "123456";
+        String userPhone = "13245678901";
         try {
-            long result = userService.userRegister(userAccount, userPassword, checkPassword);
+            long result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
             userAccount = "ky";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
             userAccount = "kyle";
             userPassword = "123456";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
             userAccount = "ky le";
             userPassword = "12345678";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
             checkPassword = "123456789";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
             userAccount = "dogkyle";
             checkPassword = "12345678";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
             userAccount = "kyle";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userAccount, userPassword, checkPassword, userPhone);
             Assertions.assertEquals(-1, result);
         } catch (Exception e) {
 

@@ -2,7 +2,10 @@ package com.kyle.project.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.kyle.project.model.entity.User;
+import com.kyle.kyapicommon.model.entity.User;
+import com.kyle.project.common.BaseResponse;
+import com.kyle.project.model.dto.user.UserLoginRequest;
+import com.kyle.project.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,7 +24,7 @@ public interface UserService extends IService<User> {
      * @param checkPassword 校验密码
      * @return 新用户 id
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
+    long userRegister(String userAccount, String userPassword, String checkPassword, String userPhone);
 
     /**
      * 用户登录
@@ -56,4 +59,14 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean userLogout(HttpServletRequest request);
+
+    /**
+     *
+     * 短信登入
+     * @param userLoginRequest
+     * @param request
+     * @return
+     */
+
+    BaseResponse<UserVO> codeLogin(UserLoginRequest userLoginRequest, HttpServletRequest request);
 }

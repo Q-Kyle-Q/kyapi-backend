@@ -1,28 +1,28 @@
 # SpringBoot 项目初始模板
 
-> by [程序员鱼皮知识星球](https://kyle.icu)
 
-Java SpringBoot 项目初始模板，整合了常用框架和示例代码，大家可以在此基础上快速开发自己的项目。
+## 技术栈
 
-## 模板功能
-
-- Spring Boot 2.7.0（贼新）
+- Spring Boot 2.7.0
 - Spring MVC
+- SpringCloud-GateWay
+- Nacos 2.1.2（服务注册中心）
+- Dubbo 3.0.9（RPC 远程调用服务）
 - MySQL 驱动
 - MyBatis
 - MyBatis Plus
-- Spring Session Redis 分布式登录
 - Spring AOP
-- Apache Commons Lang3 工具类
-- Lombok 注解
 - Swagger + Knife4j 接口文档
-- Spring Boot 调试工具和项目处理器
 - 全局请求响应拦截器（记录日志）
 - 全局异常处理器
 - 自定义错误码
 - 封装通用响应类
 - 示例用户注册、登录、搜索功能
-- 示例单元测试类
-- 示例 SQL（用户表）
 
-访问 localhost:7529/api/doc.html 就能在线调试接口了，不需要前端配合啦~
+访问 localhost:7529/api/doc.html 就能在线调试接口了，不需要前端配合
+
+启动模块顺序： kyapi-backend => kyapi-interface => kyapi-gateway，否则可能发生报错
+
+前端（npm install dev）要在后端模块 kyapi-backend启动后再启动
+
+前端访问管理员账户和密码=>   账号：kyle    密码：12345678

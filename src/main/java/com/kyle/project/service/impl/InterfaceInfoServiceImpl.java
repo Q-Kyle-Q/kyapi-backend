@@ -1,11 +1,11 @@
 package com.kyle.project.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kyle.kyapicommon.model.entity.InterfaceInfo;
 import com.kyle.project.common.ErrorCode;
 import com.kyle.project.exception.BusinessException;
 import com.kyle.project.model.entity.Post;
 import com.kyle.project.service.InterfaceInfoService;
-import com.kyle.project.model.entity.InterfaceInfo;
 import com.kyle.project.mapper.InterfaceInfoMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, InterfaceInfo>
-    implements InterfaceInfoService {
+        implements InterfaceInfoService {
 
     @Override
     public void validInterfaceInfo(InterfaceInfo interfaceInfo, boolean add) {

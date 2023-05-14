@@ -17,4 +17,16 @@ public class UserLoginRequest implements Serializable {
     private String userAccount;
 
     private String userPassword;
+
+    /**
+     *
+     *用户手机号
+     */
+    private String userPhone;
+
+    /**
+     *
+     * 验证码
+     */
+    private String code;
 }

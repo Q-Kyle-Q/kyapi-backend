@@ -2,6 +2,8 @@ package com.kyle.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kyle.kyapicommon.model.entity.User;
+import com.kyle.kyapicommon.model.entity.UserInterfaceInfo;
 import com.kyle.project.annotation.AuthCheck;
 import com.kyle.project.common.BaseResponse;
 import com.kyle.project.common.DeleteRequest;
@@ -13,8 +15,6 @@ import com.kyle.project.exception.BusinessException;
 import com.kyle.project.model.dto.userinterfaceinfo.UserInterfaceInfoAddRequest;
 import com.kyle.project.model.dto.userinterfaceinfo.UserInterfaceInfoQueryRequest;
 import com.kyle.project.model.dto.userinterfaceinfo.UserInterfaceInfoUpdateRequest;
-import com.kyle.project.model.entity.User;
-import com.kyle.project.model.entity.UserInterfaceInfo;
 import com.kyle.project.service.UserInterfaceInfoService;
 import com.kyle.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;

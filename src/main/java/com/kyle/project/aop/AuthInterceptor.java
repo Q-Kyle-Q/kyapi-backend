@@ -1,10 +1,10 @@
 package com.kyle.project.aop;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.kyle.kyapicommon.model.entity.User;
 import com.kyle.project.annotation.AuthCheck;
 import com.kyle.project.common.ErrorCode;
 import com.kyle.project.exception.BusinessException;
-import com.kyle.project.model.entity.User;
 import com.kyle.project.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;

@@ -3,27 +3,35 @@ package com.kyle.project.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.kyle.kyapiclientsdk.client.KyApiClient;
+import com.kyle.kyapicommon.model.entity.InterfaceInfo;
+import com.kyle.kyapicommon.model.entity.User;
+import com.kyle.kyapicommon.model.entity.UserInterfaceInfo;
 import com.kyle.project.annotation.AuthCheck;
 import com.kyle.project.common.*;
 import com.kyle.project.constant.CommonConstant;
 import com.kyle.project.exception.BusinessException;
+import com.kyle.project.mapper.UserInterfaceInfoMapper;
+import com.kyle.project.mapper.UserMapper;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.kyle.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
-import com.kyle.project.model.entity.InterfaceInfo;
-import com.kyle.project.model.entity.User;
 import com.kyle.project.model.enums.InterfaceInfoStatusEnum;
+import com.kyle.project.model.vo.InterfaceInfoVO;
 import com.kyle.project.service.InterfaceInfoService;
+import com.kyle.project.service.UserInterfaceInfoService;
 import com.kyle.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -43,7 +51,13 @@ public class InterfaceInfoController {
     private UserService userService;
 
     @Resource
-    private KyApiClient kyApiClient;
+    private UserInterfaceInfoMapper userInterfaceInfoMapper;
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private UserInterfaceInfoService userInterfaceInfoService;
 
     // region 增删改查
 
@@ -69,6 +83,19 @@ public class InterfaceInfoController {
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
+
+        // 为所有的用户添加新创建的接口
+        List<User> users = userMapper.selectList(null);
+        HashMap<Object, Object> map = new HashMap<>();
+        for (User user : users) {
+            map.put("userId", user.getId());
+            map.put("interfaceInfoId", interfaceInfo.getId());
+            boolean result2 = userInterfaceInfoMapper.addNewInterface(map);
+            if (!result2) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR);
+            }
+        }
+
         long newInterfaceInfoId = interfaceInfo.getId();
         return ResultUtils.success(newInterfaceInfoId);
     }
@@ -139,12 +166,30 @@ public class InterfaceInfoController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id) {
+    public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
-        return ResultUtils.success(interfaceInfo);
+
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.eq("userId", userId)
+                .eq("interfaceInfoId", id);
+
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.getOne(queryWrapper);
+        Integer totalNum = userInterfaceInfo.getTotalNum();
+        Integer leftNum = userInterfaceInfo.getLeftNum();
+
+        InterfaceInfoVO interfaceInfoVO = new InterfaceInfoVO();
+        BeanUtils.copyProperties(interfaceInfo, interfaceInfoVO);
+        interfaceInfoVO.setTotalNum(totalNum);
+        interfaceInfoVO.setLeftNum(leftNum);
+
+        return ResultUtils.success(interfaceInfoVO);
     }
 
     /**
@@ -212,6 +257,8 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
                                                      HttpServletRequest request) {
+        ImmutablePair<Integer, String> res = null;
+
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -221,18 +268,34 @@ public class InterfaceInfoController {
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 判断该接口是否可以调用
-        com.kyle.kyapiclientsdk.model.User user = new com.kyle.kyapiclientsdk.model.User();
-        user.setUsername("test");
 
-        /**
-         *  kyApiClient.getUsernameByPost(user) 这个方法需要将 kyapi-interface这个服务打开，否则 kyapi-interface的 8123端口不会打开运行，
-         *      那么 kyapi-client-sdk这个服务也不会正常运行，因为它的 kyApiClient.getUsernameByPost(user)方法使用到了8123端口进行远程调用
-         */
-        String username = kyApiClient.getUsernameByPost(user);
-        if (StringUtils.isBlank(username)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        KyApiClient kyApiClient = new KyApiClient(accessKey, secretKey);
+
+        // 判断该接口是否可以调用
+        if (oldInterfaceInfo.getUrl().contains("user")) {
+            com.kyle.kyapiclientsdk.model.User user = new com.kyle.kyapiclientsdk.model.User();
+            user.setUsername("test");
+            /**
+             *  kyApiClient.getUsernameByPost(user) 这个方法需要将 kyapi-interface这个服务打开，否则 kyapi-interface的 8123端口不会打开运行，
+             *      那么 kyapi-client-sdk这个服务也不会正常运行，因为它的 kyApiClient.getUsernameByPost(user)方法使用到了8123端口进行远程调用
+             */
+            res = kyApiClient.getUsernameByPost(user);
         }
+
+        if (oldInterfaceInfo.getUrl().contains("randomJoke")) {
+            res = kyApiClient.randomJoke();
+        }
+
+        if (oldInterfaceInfo.getUrl().contains("randomACGPictures")) {
+            res = kyApiClient.randomACGPictures();
+        }
+        if (res == null || res.getLeft() != 200) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口处于不可调用状态，请查看日志");
+        }
+
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
@@ -281,6 +344,9 @@ public class InterfaceInfoController {
     @PostMapping("/invoke")
     public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
                                                     HttpServletRequest request) {
+
+        ImmutablePair<Integer, String> res = null;
+
         if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -297,11 +363,31 @@ public class InterfaceInfoController {
         User loginUser = userService.getLoginUser(request);
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
-        KyApiClient tempClient = new KyApiClient(accessKey, secretKey);
-        Gson gson = new Gson();
-        com.kyle.kyapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.kyle.kyapiclientsdk.model.User.class);
-        String usernameByPost = tempClient.getUsernameByPost(user);
-        return ResultUtils.success(usernameByPost);
+        KyApiClient kyApiClient = new KyApiClient(accessKey, secretKey);
+
+        try {
+            if (oldInterfaceInfo.getUrl().contains("randomJoke")) {
+                res = kyApiClient.randomJoke();
+            }
+            if (oldInterfaceInfo.getUrl().contains("randomACGPictures")) {
+                res = kyApiClient.randomACGPictures();
+            }
+            if (oldInterfaceInfo.getUrl().contains("user")) {
+                Gson gson = new Gson();
+                com.kyle.kyapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.kyle.kyapiclientsdk.model.User.class);
+                res = kyApiClient.getUsernameByPost(user);
+            }
+        } catch (JsonSyntaxException exception) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不为 Json 格式");
+        }
+        if (res == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口错误，请联系管理员");
+        }
+        if (res.getLeft() != 200){
+            throw new BusinessException(res.getLeft(), res.getRight());
+        }
+
+        return ResultUtils.success(res.getRight());
     }
 
 }

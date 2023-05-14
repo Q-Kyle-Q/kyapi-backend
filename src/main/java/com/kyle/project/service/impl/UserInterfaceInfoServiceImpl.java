@@ -2,19 +2,24 @@ package com.kyle.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kyle.kyapicommon.model.entity.UserInterfaceInfo;
 import com.kyle.project.common.ErrorCode;
 import com.kyle.project.exception.BusinessException;
 import com.kyle.project.mapper.UserInterfaceInfoMapper;
-import com.kyle.project.model.entity.UserInterfaceInfo;
 import com.kyle.project.service.UserInterfaceInfoService;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  *
  */
 @Service
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
-    implements UserInterfaceInfoService {
+        implements UserInterfaceInfoService {
+
+    @Resource
+    private UserInterfaceInfoMapper userInterfaceInfoMapper;
 
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
@@ -47,8 +52,23 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         return this.update(updateWrapper);
     }
 
-}
+    @Override
+    public boolean leftInvokeCount(long interfaceInfoId, long userId) {
 
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoMapper.selectById(userId);
+
+        // 判断
+        if (interfaceInfoId <= 0 || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        if(userInterfaceInfo.getLeftNum() <= 0) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        return true;
+    }
+
+}
 
 
 

@@ -1,7 +1,7 @@
 package com.kyle.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.kyle.project.model.entity.InterfaceInfo;
+import com.kyle.kyapicommon.model.entity.InterfaceInfo;
 import com.kyle.project.model.entity.Post;
 
 /**
