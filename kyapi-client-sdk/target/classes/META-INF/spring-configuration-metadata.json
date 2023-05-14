@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "kyapi.client",
+      "type": "com.kyle.kyapiclientsdk.KyApiClientConfig",
+      "sourceType": "com.kyle.kyapiclientsdk.KyApiClientConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "kyapi.client.access-key",
+      "type": "java.lang.String",
+      "sourceType": "com.kyle.kyapiclientsdk.KyApiClientConfig"
+    },
+    {
+      "name": "kyapi.client.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "com.kyle.kyapiclientsdk.KyApiClientConfig"
+    }
+  ],
+  "hints": []
+}
