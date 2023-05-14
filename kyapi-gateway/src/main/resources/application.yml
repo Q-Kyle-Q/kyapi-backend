@@ -1,0 +1,42 @@
+server:
+  port: 8090
+spring:
+  cloud:
+    gateway:  # 建议看官方文档进行学习
+      default-filters:  # 全局的给所有经过网关的请求添加 kyle这个响应头，而不只是针对某一个请求
+        - AddResponseHeader=source, kyle
+      routes:
+        - id: api_route
+          uri: http://localhost:8123
+          predicates:
+            - Path=/api/**
+#        - id: add_request_header_route
+#          uri: http://localhost:8123  # http://localhost:8090/api/name/get 浏览器输入这个 url会被转发到 http://localhost:8123/api/name/get
+#          predicates:
+#            - Path=/api/**
+#          filters:
+#            - AddRequestHeader=kyle, swag  # 给这个请求添加请求头 kyle，它的值为swag（request.getHeader("kyle")）
+#            - AddRequestParameter=name, dog   # 给这个请求添加请求参数 name，它的值为dog
+#            - name: CircuitBreaker  # 降级操作需要额外引入依赖 spring-cloud-starter-circuitbreaker-reactor-resilience4j
+#              args: # 这个操作不太好测试
+#                name: myCircuitBreaker
+#                fallbackUri: forward:/fallback  # 出现了异常场景时会转发到 /fallback
+#        - id: kyle-fallback
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Path=/fallback  # 申请转发的路径 /fallback
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+dubbo:
+  application: # dubbo 整合nacos要其版本在 2.0.0及以上版本
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848
